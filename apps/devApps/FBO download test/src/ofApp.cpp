@@ -20,7 +20,7 @@ void ofApp::setup(){
 
 	plane.set(planeWidth, planeHeight, planeColums, planeRows, OF_PRIMITIVE_TRIANGLES);
 	
-	fbo.allocate(1920,1090, GL_RGBA);
+	fbo.allocate(1920,1090, GL_RGBA, 0);
 }
 
 //--------------------------------------------------------------
