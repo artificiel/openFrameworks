@@ -1046,6 +1046,24 @@ void ofFbo::resetAnchor(){
 }
 
 //----------------------------------------------------------
+//----------------------------------------------------------
+void ofFbo::readToPixelsNEW(ofPixels & pixels, int attachmentPoint) const{
+	if(!bIsAllocated) return;
+	
+#ifndef TARGET_OPENGLES // <-- non OPENGLES
+	if(settings.numSamples>0){
+		getTexture(attachmentPoint).readToPixels(pixels);
+	}else{
+#endif
+		pixels.allocate(settings.width,settings.height,ofGetImageTypeFromGLType(settings.internalformat));
+		bind();
+		int format = ofGetGLFormatFromInternal(settings.internalformat);
+		glReadPixels(0,0,settings.width, settings.height, format, GL_UNSIGNED_BYTE, pixels.getData());
+		unbind();
+#ifndef TARGET_OPENGLES
+	}
+#endif
+}
 void ofFbo::readToPixels(ofPixels & pixels, int attachmentPoint) const{
 	if(!bIsAllocated) return;
 #ifndef TARGET_OPENGLES
@@ -1058,6 +1076,7 @@ void ofFbo::readToPixels(ofPixels & pixels, int attachmentPoint) const{
 	unbind();
 #endif
 }
+
 
 //----------------------------------------------------------
 void ofFbo::readToPixels(ofShortPixels & pixels, int attachmentPoint) const{

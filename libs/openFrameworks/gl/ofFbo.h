@@ -156,6 +156,8 @@ public:
 	/// \sa       void begin(bool setupScreen=true) const;
 	void end() const;
 
+	void readToPixelsNEW(ofPixels & pixels, int attachmentPoint = 0) const;
+
 	void readToPixels(ofPixels & pixels, int attachmentPoint = 0) const;
 	void readToPixels(ofShortPixels & pixels, int attachmentPoint = 0) const;
 	void readToPixels(ofFloatPixels & pixels, int attachmentPoint = 0) const;
