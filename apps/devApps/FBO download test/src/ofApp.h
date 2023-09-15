@@ -3,29 +3,22 @@
 #include "ofMain.h"
 #include "ofxFastFboReader.h"
 
-class ofApp : public ofBaseApp{
-	public:
-		
-	void setup();
-	void update();
-	void draw();
-	
-	void keyPressed(int key);
-	void keyReleased(int key);
-	void mouseMoved(int x, int y);
-	void mouseDragged(int x, int y, int button);
-	void mousePressed(int x, int y, int button);
-	void mouseReleased(int x, int y, int button);
-	void windowResized(int w, int h);
-	void dragEvent(ofDragInfo dragInfo);
-	void gotMessage(ofMessage msg);
+class ofApp : public ofBaseApp {
 
-	ofShader shader;
-	ofPlanePrimitive plane;
-	
-	int mode {1};
-	ofxFastFboReader reader;
-	ofFbo fbo;
-	ofPixels pixels;
-	ofImage image;
+public:
+    void setup() override;
+    void update() override;
+    void draw() override;
+
+    void keyPressed(int key) override;
+
+    ofShader shader;
+    ofPlanePrimitive plane;
+
+    int mode { 1 };
+    bool upload { false };
+    ofxFastFboReader reader;
+    ofFbo fbo;
+    ofPixels pixels;
+    ofImage image;
 };
