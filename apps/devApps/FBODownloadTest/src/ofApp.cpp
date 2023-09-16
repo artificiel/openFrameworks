@@ -97,7 +97,7 @@ void ofApp::keyPressed(int key) {
     if (key == '2') mode = 2;
     if (key == '3') mode = 3;
     if (key == 'u') upload = !upload;
-    if (key == '+') num_iters = ofClamp(num_iters+1, 1, 100);
-    if (key == '-') num_iters = ofClamp(num_iters-1, 1, 100);
+    if (key == '+' || key == '=') num_iters = ofClamp(num_iters+1, 1, 1000);
+    if (key == '-') num_iters = ofClamp(num_iters-1, 1, 1000);
 
 }
