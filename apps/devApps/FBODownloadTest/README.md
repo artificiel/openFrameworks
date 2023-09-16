@@ -30,3 +30,5 @@ The number is the largest number that consistently reports ≥ 30fps.
 Results are taken with the window floating as frontmost, upload disabled, size of 1920x1080 (on otherwise tranquil systems). Results are eyeballed over a 10-second window of stability (outlier drops are not considered). 30fps was selected instead of the usual 60 to give a chance of meaningful number on slower systems.
 
 The "upload" toggle serves to visually confirm the data is correctly being downloaded but should be disabled for benchmarking purposes.
+
+DISCLAIMER: this benchmark is not meant to compare systems on an absolute basis but to get a baseline from which isolated variables can be tested. 
