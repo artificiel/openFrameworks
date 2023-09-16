@@ -15,6 +15,7 @@ public:
     ofShader shader;
     ofPlanePrimitive plane;
 
+    size_t num_iters { 1 };
     int mode { 1 };
     bool upload { false };
     ofxFastFboReader reader;
