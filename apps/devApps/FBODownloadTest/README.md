@@ -19,11 +19,10 @@ Results with the window floating as frontmost, upload 0 with it's OF-set size of
 
 | system | arch | OS |  | mode 1 (current) | mode 2 (new) | mode 3 (ofxFast)| notes |
 | - | - | - | - | - | - |
-| M2 pro (6(12) core / 19 gpu)   | aarm64 | macOS 13.4 |    | 245-250 | 355-357 | 1042-1047 | AB:20230915 |
-|                                |        |            |    | 245-255 | 360-363 | 1080-1090 | AB:20230915 | 
-| M1 (8/4 cores ; 8 gpu)         | aarm64 | macOS 13.4 |    |  9 | 14 | 41 | AB:20230913 |
+| M2 pro (6(12) core / 19 gpu)   | aarm64 | macOS 13.4 |    | 13 | 18 | 104 | AB:20230915 |
+| M1 (8/4 cores ; 8 gpu)         | aarm64 | macOS 13.4 |    |  9 | 14 |  41 | AB:20230913 |
 | i7 2.6gHz (6/12 cores ; 560X)  | x64    | macOS 13.4 |    | 140-160 | 235-240 |  250-290  | AB:20230913 |
-| i7-9700K ; nvidia 2080SUPER    | x64    | linux 5.15 |    | 11 | 31 | 35 | AB:20230914 |
+| i7-9700K ; nvidia 2080SUPER    | x64    | linux 5.15 |    | 11 | 31 |  35 | AB:20230914 |
 
 results are eyeballed over a 10-second window of stability (outlier drops are not considered).
 
