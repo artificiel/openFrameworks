@@ -5,7 +5,7 @@
 A shader produces data in the FBO, which is processed depending on mode, which is specified by hitting the corresponding key:
 
  - mode 1: download with current method
- - mode 2: download with proposed ES method
+ - mode 2: download with proposed method
  - mode 3: download with [ofxFastFboReader](https://github.com/satoruhiga/ofxFastFboReader)
  
 Vertical sync is disabled, allowing > 60fps values. Compiled in Release.
