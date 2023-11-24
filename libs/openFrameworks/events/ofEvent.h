@@ -82,10 +82,11 @@ namespace priv{
 	template<typename T, class Mutex>
 	class Function{
 	public:
-		Function(int priority, std::function<bool(const void*,T&)> function,  std::unique_ptr<BaseFunctionId>&& id )
+		Function(int priority, std::function<bool(const void*,T&)> function,  std::unique_ptr<BaseFunctionId>&& id, bool immediate = true )
 		:priority(priority)
 		,id(std::move(id))
-		,function(function){}
+		,function(function)
+		,immediate(immediate){}
 
 		bool operator==(const Function<T,Mutex> & f) const{
 			return f.priority == priority && *id == *f.id;
@@ -99,14 +100,17 @@ namespace priv{
 				return false;
 			}
 		}
-
-		inline void disable(){
+	
+		// is this really "disabling" and not "clearing" or "resetting"? 
+		// (as there is no corresponding enable(); the effect is the function is lost)
+		inline void disable() {
 			std::unique_lock<Mutex> lck(mtx);
 			function = nullptr;
 		}
 
 		int priority;
 		std::unique_ptr<BaseFunctionId> id;
+		bool immediate;
 
 	private:
 		std::function<bool(const void*,T&)> function;
@@ -117,10 +121,11 @@ namespace priv{
 	template<class Mutex>
 	class Function<void,Mutex>{
 	public:
-		Function(int priority, std::function<bool(const void*)> function,  std::unique_ptr<BaseFunctionId> && id )
+		Function(int priority, std::function<bool(const void*)> function,  std::unique_ptr<BaseFunctionId> && id, bool immediate = true )
 		:priority(priority)
 		,id(std::move(id))
-		,function(function){}
+		,function(function)
+		,immediate(immediate){}
 
 		bool operator==(const Function<void,Mutex> & f) const{
 			return f.priority == priority && *id == *f.id;
@@ -128,9 +133,9 @@ namespace priv{
 
 		inline bool notify(const void*s){
 			std::unique_lock<Mutex> lck(mtx);
-			try{
+			try {
 				return function(s);
-			}catch(std::bad_function_call &){
+			} catch (std::bad_function_call &){
 				return false;
 			}
 		}
@@ -139,7 +144,9 @@ namespace priv{
 			std::unique_lock<Mutex> lck(mtx);
 			function = nullptr;
 		}
+		
 
+		bool immediate;
 		int priority;
 		std::unique_ptr<BaseFunctionId> id;
 	private:
@@ -479,25 +486,25 @@ protected:
 	}
 
 	template<class TObj>
-	FunctionPtr make_function(TObj * listener, bool (TObj::*method)(T&), int priority){
-		return std::make_shared<Function>(priority, std::bind(method,listener,std::placeholders::_2), make_function_id(listener,method));
+	FunctionPtr make_function(TObj * listener, bool (TObj::*method)(T&), int priority, bool immediate = true){
+		return std::make_shared<Function>(priority, std::bind(method,listener,std::placeholders::_2), make_function_id(listener,method), immediate);
 	}
 
 	template<class TObj>
-	FunctionPtr make_function(TObj * listener, void (TObj::*method)(T&), int priority){
+	FunctionPtr make_function(TObj * listener, void (TObj::*method)(T&), int priority, bool immediate = true){
 		return std::make_shared<Function>(priority, [listener, method](const void*, T&t){
 			((listener)->*(method))(t);
 			return false;
-		}, make_function_id(listener,method));
+		}, make_function_id(listener,method), immediate);
 	}
 
 	template<class TObj>
-	FunctionPtr make_function(TObj * listener, bool (TObj::*method)(const void*, T&), int priority){
-		return std::make_shared<Function>(priority, std::bind(method,listener,std::placeholders::_1,std::placeholders::_2), make_function_id(listener,method));
+	FunctionPtr make_function(TObj * listener, bool (TObj::*method)(const void*, T&), int priority, bool immediate = true){
+		return std::make_shared<Function>(priority, std::bind(method,listener,std::placeholders::_1,std::placeholders::_2), make_function_id(listener,method), immediate);
 	}
 
 	template<class TObj>
-	FunctionPtr make_function(TObj * listener, void (TObj::*method)(const void*, T&), int priority){
+	FunctionPtr make_function(TObj * listener, void (TObj::*method)(const void*, T&), int priority, bool immediate = true){
 		return std::make_shared<Function>(priority, [listener, method](const void*s, T&t){
 			std::bind(method,listener,std::placeholders::_1,std::placeholders::_2)(s,t);
 			return false;
@@ -514,20 +521,20 @@ protected:
 		}
 	}
 
-	FunctionPtr make_function(std::function<bool(T&)> f, int priority) {
-		return std::make_shared<Function>(priority, [f](const void*, T&t) {return f(t); }, make_std_function_id(f));
+	FunctionPtr make_function(std::function<bool(T&)> f, int priority, bool immediate = true) {
+		return std::make_shared<Function>(priority, [f](const void*, T&t) {return f(t); }, make_std_function_id(f), immediate);
 	}
 
-	FunctionPtr make_function(std::function<bool(const void*, T&)> f, int priority) {
-		return std::make_shared<Function>(priority, f, make_std_function_id(f));
+	FunctionPtr make_function(std::function<bool(const void*, T&)> f, int priority, bool immediate = true) {
+		return std::make_shared<Function>(priority, f, make_std_function_id(f), immediate);
 	}
 
-	FunctionPtr make_function(std::function<void(T&)> f, int priority) {
-		return std::make_shared<Function>(priority, [f](const void*, T&t) {f(t); return false; }, make_std_function_id(f));
+	FunctionPtr make_function(std::function<void(T&)> f, int priority, bool immediate = true) {
+		return std::make_shared<Function>(priority, [f](const void*, T&t) {f(t); return false; }, make_std_function_id(f), immediate);
 	}
 
-	FunctionPtr make_function(std::function<void(const void*, T&)> f, int priority) {
-		return std::make_shared<Function>(priority, [f](const void*s, T&t) {f(s, t); return false; }, make_std_function_id(f));
+	FunctionPtr make_function(std::function<void(const void*, T&)> f, int priority, bool immediate = true) {
+		return std::make_shared<Function>(priority, [f](const void*s, T&t) {f(s, t); return false; }, make_std_function_id(f), immediate);
 	}
 
 
@@ -536,13 +543,13 @@ protected:
 
 public:
 	template<class TObj, typename TMethod>
-	std::unique_ptr<of::priv::AbstractEventToken> newListener(TObj * listener, TMethod method, int priority = OF_EVENT_ORDER_AFTER_APP){
-		return addFunction(make_function(listener,method,priority));
+	std::unique_ptr<of::priv::AbstractEventToken> newListener(TObj * listener, TMethod method, int priority = OF_EVENT_ORDER_AFTER_APP, bool immediate = true){
+		return addFunction(make_function(listener,method,priority, immediate));
 	}
 
 	template<class TObj, typename TMethod>
-	void add(TObj * listener, TMethod method, int priority){
-		addNoToken(make_function(listener,method,priority));
+	void add(TObj * listener, TMethod method, int priority, bool immediate = true){
+		addNoToken(make_function(listener,method,priority,immediate));
 	}
 
 	template<class TObj, typename TMethod>
@@ -551,13 +558,13 @@ public:
 	}
 
 	template<typename TFunction>
-	std::unique_ptr<of::priv::AbstractEventToken> newListener(TFunction function, int priority = OF_EVENT_ORDER_AFTER_APP) {
-		return addFunction(make_function(std::function<typename of::priv::callable_traits<TFunction>::function_type>(function), priority));
+	std::unique_ptr<of::priv::AbstractEventToken> newListener(TFunction function, int priority = OF_EVENT_ORDER_AFTER_APP, bool immediate = true) {
+		return addFunction(make_function(std::function<typename of::priv::callable_traits<TFunction>::function_type>(function), priority, immediate));
 	}
 
 	template<typename TFunction>
-	void add(TFunction function, int priority){
-		addNoToken(make_function(std::function<typename of::priv::callable_traits<TFunction>::function_type>(function),priority));
+	void add(TFunction function, int priority, bool immediate = true){
+		addNoToken(make_function(std::function<typename of::priv::callable_traits<TFunction>::function_type>(function),priority, immediate));
 	}
 
 	template<typename TFunction>
@@ -565,32 +572,84 @@ public:
 		 ofEvent<T,Mutex>::self->remove(*make_function(std::function<typename of::priv::callable_traits<TFunction>::function_type>(function), priority)->id);
 	}
 
+	std::deque<std::tuple<std::shared_ptr<of::priv::Function<T, Mutex>>,const void*, T &>> pending_callbacks;
+	bool pre_notification_value {false};
+	std::vector<std::tuple<T &>> notifying_param;
+	
+	std::optional<T *> did_notify() {
+		if (pre_notification_value) {
+			T * p = &(std::get<0>(notifying_param[0]));
+			pre_notification_value = false;
+			return p; // can be nulltpr legally
+		} else {
+			return {};
+		}
+	}
+	
+	auto clearAllPendingCallbacks() {
+		pending_callbacks.clear();
+	}
+	
+	inline bool invokeAllPendingCallbacks(bool allow_interruptions = true) {
+		while (!pending_callbacks.empty()) {
+			auto &[f, caller, param] = pending_callbacks.front();
+			if (f->notify(caller, param) && allow_interruptions) {
+				// interruptor returned true
+				clearAllPendingCallbacks();
+				return true;
+			} else {
+				pending_callbacks.pop_front();
+			}
+		}
+		return false;
+	}
+	
+	std::optional<std::tuple<bool, T & >> invokeOnePendingCallback() {
+		if (!pending_callbacks.empty()) {
+			auto &[f, caller, param] = pending_callbacks.front();
+			if (f->notify(caller, param)) {
+				clearAllPendingCallbacks();
+				return { std::forward_as_tuple(true, param) };
+			} else {
+				pending_callbacks.pop_front();
+				return { std::forward_as_tuple(false, param) };
+			}
+		}
+		return {};
+	}
+	
 	inline bool notify(const void* sender, T & param){
-		if(ofEvent<T,Mutex>::self->enabled && !ofEvent<T,Mutex>::self->functions.empty()){
-			std::unique_lock<Mutex> lck(ofEvent<T,Mutex>::self->mtx);
-			auto functions_copy = ofEvent<T,Mutex>::self->functions;
-			lck.unlock();
-			for(auto & f: functions_copy){
-                if(f->notify(sender,param)){
-					return true;
-                }
+		if (ofEvent<T,Mutex>::self->enabled) {
+			if (!pre_notification_value) {
+				T & previous = param;
+				pre_notification_value = true;
+				notifying_param.emplace_back(std::forward_as_tuple(param));
+//				T * x = param; // affect even if no listeners
+			}
+			if (!ofEvent<T,Mutex>::self->functions.empty()) {
+				std::unique_lock<Mutex> lck(ofEvent<T,Mutex>::self->mtx);
+				auto functions_copy = ofEvent<T,Mutex>::self->functions;
+				lck.unlock();
+				for (auto & f: functions_copy) {
+					if (f->immediate) {
+						// invoked synchronously on the notifier's thread
+						if (f->notify(sender,param)) { // interrupt propagation if a listener returns true (ofxGui)
+							return true;
+						}
+					} else {
+						// buffered, to be invoked with invokePendingCallback(), perhaps on a different thread
+						pending_callbacks.emplace_back(std::forward_as_tuple(f, sender, param));
+					}
+					if (!ofEvent<T,Mutex>::self->enabled) return false; // double-check in case a callback disables this event
+				}
 			}
 		}
 		return false;
 	}
 
 	inline bool notify(T & param){
-		if(ofEvent<T,Mutex>::self->enabled && !ofEvent<T,Mutex>::self->functions.empty()){
-			std::unique_lock<Mutex> lck(ofEvent<T,Mutex>::self->mtx);
-			auto functions_copy = ofEvent<T,Mutex>::self->functions;
-			lck.unlock();
-			for(auto & f: functions_copy){
-				if(f->notify(nullptr,param)){
-					return true;
-				}
-			}
-		}
-		return false;
+		// code reduction: sends param to a single "designated handler"
+		return this->notify(nullptr, param);
 	}
 };
 
@@ -638,29 +697,29 @@ protected:
 	}
 
 	template<class TObj>
-	FunctionPtr make_function(TObj * listener, bool (TObj::*method)(), int priority){
-		return std::make_shared<Function>(priority, std::bind(method,listener), make_function_id(listener,method));
+	FunctionPtr make_function(TObj * listener, bool (TObj::*method)(), int priority, bool immediate = true){
+		return std::make_shared<Function>(priority, std::bind(method,listener), make_function_id(listener,method), immediate);
 	}
 
 	template<class TObj>
-	FunctionPtr make_function(TObj * listener, void (TObj::*method)(), int priority){
+	FunctionPtr make_function(TObj * listener, void (TObj::*method)(), int priority, bool immediate = true){
 		return std::make_shared<Function>(priority,[listener, method](const void*){
 			std::bind(method,listener)();
 			return false;
-		}, make_function_id(listener,method));
+		}, make_function_id(listener,method), immediate);
 	}
 
 	template<class TObj>
-	FunctionPtr make_function(TObj * listener, bool (TObj::*method)(const void*), int priority){
-		return std::make_shared<Function>(priority,std::bind(method,listener,std::placeholders::_1), make_function_id(listener,method));
+	FunctionPtr make_function(TObj * listener, bool (TObj::*method)(const void*), int priority, bool immediate = true){
+		return std::make_shared<Function>(priority,std::bind(method,listener,std::placeholders::_1), make_function_id(listener,method), immediate);
 	}
 
 	template<class TObj>
-	FunctionPtr make_function(TObj * listener, void (TObj::*method)(const void*), int priority){
+	FunctionPtr make_function(TObj * listener, void (TObj::*method)(const void*), int priority, bool immediate = true){
 		return std::make_shared<Function>(priority,[listener, method](const void* sender){
 			std::bind(method,listener,std::placeholders::_1)(sender);
 			return false;
-		}, make_function_id(listener,method));
+		}, make_function_id(listener,method), immediate);
 	}
 
 	template<typename F>
@@ -673,20 +732,20 @@ protected:
 		}
 	}
 
-	FunctionPtr make_function(std::function<bool()> f, int priority) {
-		return std::make_shared<Function>(priority, [f](const void*) {return f(); }, make_std_function_id(f));
+	FunctionPtr make_function(std::function<bool()> f, int priority, bool immediate = true) {
+		return std::make_shared<Function>(priority, [f](const void*) {return f(); }, make_std_function_id(f), immediate);
 	}
 
-	FunctionPtr make_function(std::function<bool(const void*)> f, int priority) {
-		return std::make_shared<Function>(priority, f, make_std_function_id(f));
+	FunctionPtr make_function(std::function<bool(const void*)> f, int priority, bool immediate = true) {
+		return std::make_shared<Function>(priority, f, make_std_function_id(f), immediate);
 	}
 
-	FunctionPtr make_function(std::function<void()> f, int priority) {
-		return std::make_shared<Function>(priority, [f](const void*) {f(); return false; }, make_std_function_id(f));
+	FunctionPtr make_function(std::function<void()> f, int priority, bool immediate = true) {
+		return std::make_shared<Function>(priority, [f](const void*) {f(); return false; }, make_std_function_id(f), immediate);
 	}
 
-	FunctionPtr make_function(std::function<void(const void*)> f, int priority) {
-		return std::make_shared<Function>(priority, [f](const void*s) {f(s); return false; }, make_std_function_id(f));
+	FunctionPtr make_function(std::function<void(const void*)> f, int priority, bool immediate = true) {
+		return std::make_shared<Function>(priority, [f](const void*s) {f(s); return false; }, make_std_function_id(f), immediate);
 	}
 
 	using of::priv::BaseEvent<of::priv::Function<void,Mutex>,Mutex>::addFunction;
@@ -694,13 +753,13 @@ protected:
 
 public:
 	template<class TObj, typename TMethod>
-	void add(TObj * listener, TMethod method, int priority){
-		addNoToken(make_function(listener,method,priority));
+	void add(TObj * listener, TMethod method, int priority, bool immediate = true){
+		addNoToken(make_function(listener,method,priority, immediate));
 	}
 
 	template<class TObj, typename TMethod>
-	std::unique_ptr<of::priv::AbstractEventToken> newListener(TObj * listener, TMethod method, int priority = OF_EVENT_ORDER_AFTER_APP){
-		return addFunction(make_function(listener,method,priority));
+	std::unique_ptr<of::priv::AbstractEventToken> newListener(TObj * listener, TMethod method, int priority = OF_EVENT_ORDER_AFTER_APP, bool immediate = true){
+		return addFunction(make_function(listener,method,priority, immediate));
 	}
 
 	template<class TObj, typename TMethod>
@@ -709,13 +768,13 @@ public:
 	}
 
 	template<typename TFunction>
-	void add(TFunction function, int priority){
-		addNoToken(make_function(std::function<typename of::priv::callable_traits<TFunction>::function_type>(function),priority));
+	void add(TFunction function, int priority, bool immediate = true){
+		addNoToken(make_function(std::function<typename of::priv::callable_traits<TFunction>::function_type>(function),priority, immediate));
 	}
 
 	template<typename TFunction>
-	std::unique_ptr<of::priv::AbstractEventToken> newListener(TFunction function, int priority = OF_EVENT_ORDER_AFTER_APP) {
-		return addFunction(make_function(std::function<typename of::priv::callable_traits<TFunction>::function_type>(function), priority));
+	std::unique_ptr<of::priv::AbstractEventToken> newListener(TFunction function, int priority = OF_EVENT_ORDER_AFTER_APP, bool immediate = true) {
+		return addFunction(make_function(std::function<typename of::priv::callable_traits<TFunction>::function_type>(function), priority, immediate));
 	}
 
 	template<typename TFunction>
@@ -723,27 +782,13 @@ public:
 		 ofEvent<void,Mutex>::self->remove(*make_function(std::function<typename of::priv::callable_traits<TFunction>::function_type>(function),priority)->id);
 	}
 
-	bool notify(const void* sender){
+	bool notify(const void* sender = nullptr){
 		if(ofEvent<void,Mutex>::self->enabled && !ofEvent<void,Mutex>::self->functions.empty()){
 			std::unique_lock<Mutex> lck(ofEvent<void,Mutex>::self->mtx);
 			auto functions_copy = ofEvent<void,Mutex>::self->functions;
 			lck.unlock();
 			for(auto & f: functions_copy){
 				if(f->notify(sender)){
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	bool notify(){
-		if(ofEvent<void,Mutex>::self->enabled && !ofEvent<void,Mutex>::self->functions.empty()){
-			std::unique_lock<Mutex> lck(ofEvent<void,Mutex>::self->mtx);
-			auto functions_copy = ofEvent<void,Mutex>::self->functions;
-			lck.unlock();
-			for(auto & f: functions_copy){
-				if(f->notify(nullptr)){
 					return true;
 				}
 			}

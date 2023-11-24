@@ -16,95 +16,95 @@
 ///     ofAddListener(addon.newIntEvent, this, &Class::method)
 
 template <class EventType,typename ArgumentsType, class ListenerClass>
-void ofAddListener(EventType & event, ListenerClass  * listener, void (ListenerClass::*listenerMethod)(const void*, ArgumentsType&), int prio=OF_EVENT_ORDER_AFTER_APP){
+void ofAddListener(EventType & event, ListenerClass  * listener, void (ListenerClass::*listenerMethod)(const void*, ArgumentsType&), int prio=OF_EVENT_ORDER_AFTER_APP, bool immediate = true){
     event.remove(listener, listenerMethod, prio);
-    event.add(listener, listenerMethod, prio);
+    event.add(listener, listenerMethod, prio, immediate);
 }
 
 template <class EventType,typename ArgumentsType, class ListenerClass>
-void ofAddListener(EventType & event, ListenerClass  * listener, void (ListenerClass::*listenerMethod)(ArgumentsType&), int prio=OF_EVENT_ORDER_AFTER_APP){
+void ofAddListener(EventType & event, ListenerClass  * listener, void (ListenerClass::*listenerMethod)(ArgumentsType&), int prio=OF_EVENT_ORDER_AFTER_APP, bool immediate = true){
     event.remove(listener, listenerMethod, prio);
-    event.add(listener, listenerMethod, prio);
+    event.add(listener, listenerMethod, prio, immediate);
 }
 
 template <class ListenerClass>
-void ofAddListener(ofEvent<void> & event, ListenerClass  * listener, void (ListenerClass::*listenerMethod)(const void*), int prio=OF_EVENT_ORDER_AFTER_APP){
+void ofAddListener(ofEvent<void> & event, ListenerClass  * listener, void (ListenerClass::*listenerMethod)(const void*), int prio=OF_EVENT_ORDER_AFTER_APP, bool immediate = true){
     event.remove(listener, listenerMethod, prio);
-    event.add(listener, listenerMethod, prio);
+    event.add(listener, listenerMethod, prio, immediate);
 }
 
 template <class ListenerClass>
-void ofAddListener(ofEvent<void> & event, ListenerClass  * listener, void (ListenerClass::*listenerMethod)(), int prio=OF_EVENT_ORDER_AFTER_APP){
+void ofAddListener(ofEvent<void> & event, ListenerClass  * listener, void (ListenerClass::*listenerMethod)(), int prio=OF_EVENT_ORDER_AFTER_APP, bool immediate = true){
     event.remove(listener, listenerMethod, prio);
-    event.add(listener, listenerMethod, prio);
+    event.add(listener, listenerMethod, prio, immediate);
 }
 
 template <class EventType,typename ArgumentsType, class ListenerClass>
-void ofAddListener(EventType & event, ListenerClass  * listener, bool (ListenerClass::*listenerMethod)(const void*, ArgumentsType&), int prio=OF_EVENT_ORDER_AFTER_APP){
+void ofAddListener(EventType & event, ListenerClass  * listener, bool (ListenerClass::*listenerMethod)(const void*, ArgumentsType&), int prio=OF_EVENT_ORDER_AFTER_APP, bool immediate = true){
     event.remove(listener, listenerMethod, prio);
-    event.add(listener, listenerMethod, prio);
+    event.add(listener, listenerMethod, prio, immediate);
 }
 
 template <class EventType,typename ArgumentsType, class ListenerClass>
-void ofAddListener(EventType & event, ListenerClass  * listener, bool (ListenerClass::*listenerMethod)(ArgumentsType&), int prio=OF_EVENT_ORDER_AFTER_APP){
+void ofAddListener(EventType & event, ListenerClass  * listener, bool (ListenerClass::*listenerMethod)(ArgumentsType&), int prio=OF_EVENT_ORDER_AFTER_APP, bool immediate = true){
     event.remove(listener, listenerMethod, prio);
-    event.add(listener, listenerMethod, prio);
+    event.add(listener, listenerMethod, prio, immediate);
 }
 
 template <class ListenerClass>
-void ofAddListener(ofEvent<void> & event, ListenerClass  * listener, bool (ListenerClass::*listenerMethod)(const void*), int prio=OF_EVENT_ORDER_AFTER_APP){
+void ofAddListener(ofEvent<void> & event, ListenerClass  * listener, bool (ListenerClass::*listenerMethod)(const void*), int prio=OF_EVENT_ORDER_AFTER_APP, bool immediate = true){
     event.remove(listener, listenerMethod, prio);
-    event.add(listener, listenerMethod, prio);
+    event.add(listener, listenerMethod, prio, immediate);
 }
 
 template <class ListenerClass>
-void ofAddListener(ofEvent<void> & event, ListenerClass  * listener, bool (ListenerClass::*listenerMethod)(), int prio=OF_EVENT_ORDER_AFTER_APP){
+void ofAddListener(ofEvent<void> & event, ListenerClass  * listener, bool (ListenerClass::*listenerMethod)(), int prio=OF_EVENT_ORDER_AFTER_APP, bool immediate = true){
     event.remove(listener, listenerMethod, prio);
-    event.add(listener, listenerMethod, prio);
+    event.add(listener, listenerMethod, prio, immediate);
 }
 
 template <class EventType,typename ArgumentsType>
-void ofAddListener(EventType & event, void (*listenerFunction)(const void*, ArgumentsType&), int prio=OF_EVENT_ORDER_AFTER_APP){
+void ofAddListener(EventType & event, void (*listenerFunction)(const void*, ArgumentsType&), int prio=OF_EVENT_ORDER_AFTER_APP, bool immediate = true){
     event.remove(listenerFunction, prio);
-    event.add(listenerFunction, prio);
+    event.add(listenerFunction, prio, immediate);
 }
 
 template <class EventType,typename ArgumentsType>
-void ofAddListener(EventType & event, void (*listenerFunction)(ArgumentsType&), int prio=OF_EVENT_ORDER_AFTER_APP){
+void ofAddListener(EventType & event, void (*listenerFunction)(ArgumentsType&), int prio=OF_EVENT_ORDER_AFTER_APP, bool immediate = true){
     event.remove(listenerFunction, prio);
-    event.add(listenerFunction, prio);
+    event.add(listenerFunction, prio, immediate);
 }
 
-inline void ofAddListener(ofEvent<void> & event, void (*listenerFunction)(const void*), int prio=OF_EVENT_ORDER_AFTER_APP){
+inline void ofAddListener(ofEvent<void> & event, void (*listenerFunction)(const void*), int prio=OF_EVENT_ORDER_AFTER_APP, bool immediate = true){
     event.remove(listenerFunction, prio);
-    event.add(listenerFunction, prio);
+    event.add(listenerFunction, prio, immediate);
 }
 
-inline void ofAddListener(ofEvent<void> & event, void (*listenerFunction)(), int prio=OF_EVENT_ORDER_AFTER_APP){
+inline void ofAddListener(ofEvent<void> & event, void (*listenerFunction)(), int prio=OF_EVENT_ORDER_AFTER_APP, bool immediate = true){
     event.remove(listenerFunction, prio);
-    event.add(listenerFunction, prio);
-}
-
-template <class EventType,typename ArgumentsType>
-void ofAddListener(EventType & event, bool (*listenerFunction)(const void*, ArgumentsType&), int prio=OF_EVENT_ORDER_AFTER_APP){
-    event.remove(listenerFunction, prio);
-    event.add(listenerFunction, prio);
+    event.add(listenerFunction, prio, immediate);
 }
 
 template <class EventType,typename ArgumentsType>
-void ofAddListener(EventType & event, bool (*listenerFunction)(ArgumentsType&), int prio=OF_EVENT_ORDER_AFTER_APP){
+void ofAddListener(EventType & event, bool (*listenerFunction)(const void*, ArgumentsType&), int prio=OF_EVENT_ORDER_AFTER_APP, bool immediate = true){
+    event.remove(listenerFunction, prio);
+    event.add(listenerFunction, prio, immediate);
+}
+
+template <class EventType,typename ArgumentsType>
+void ofAddListener(EventType & event, bool (*listenerFunction)(ArgumentsType&), int prio=OF_EVENT_ORDER_AFTER_APP, bool immediate = true){
     event.remove(*listenerFunction, prio);
-    event.add(*listenerFunction, prio);
+    event.add(*listenerFunction, prio, immediate);
 }
 
-inline void ofAddListener(ofEvent<void> & event, bool (*listenerFunction)(const void*), int prio=OF_EVENT_ORDER_AFTER_APP){
+inline void ofAddListener(ofEvent<void> & event, bool (*listenerFunction)(const void*), int prio=OF_EVENT_ORDER_AFTER_APP, bool immediate = true){
     event.remove(*listenerFunction, prio);
-    event.add(*listenerFunction, prio);
+    event.add(*listenerFunction, prio, immediate);
 }
 
-inline void ofAddListener(ofEvent<void> & event, bool (*listenerFunction)(), int prio=OF_EVENT_ORDER_AFTER_APP){
+inline void ofAddListener(ofEvent<void> & event, bool (*listenerFunction)(), int prio=OF_EVENT_ORDER_AFTER_APP, bool immediate = true){
     event.remove(listenerFunction, prio);
-    event.add(listenerFunction, prio);
+    event.add(listenerFunction, prio, immediate);
 }
 //----------------------------------------------------
 /// unregister any method of any class to an event.

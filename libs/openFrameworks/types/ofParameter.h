@@ -515,6 +515,10 @@ public:
 
     ParameterType getInit() const;
     void reInit();
+	
+	auto did_notify() {
+		return obj->changedE.did_notify();
+	}
 
 	std::string toString() const;
 	void fromString(const std::string & name);
