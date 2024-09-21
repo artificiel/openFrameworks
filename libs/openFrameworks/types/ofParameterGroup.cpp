@@ -28,7 +28,7 @@ void ofParameterGroup::add(shared_ptr<ofAbstractParameter> param){
 }
 
 void ofParameterGroup::add(ofAbstractParameter & parameter){
-	add(parameter.newReference());
+	add(parameter.getSharedPtr());
 }
 
 void ofParameterGroup::remove(ofAbstractParameter &param){
@@ -488,7 +488,12 @@ const void* ofParameterGroup::getInternalObject() const{
 	return obj.get();
 }
 
-shared_ptr<ofAbstractParameter> ofParameterGroup::newReference() const{
+[[deprecated("use getSharedPtr")]]
+  shared_ptr<ofAbstractParameter> ofParameterGroup::newReference() const{
+	return getSharedPtr();
+}
+
+shared_ptr<ofAbstractParameter> ofParameterGroup::getSharedPtr() const{
 	return std::make_shared<ofParameterGroup>(*this);
 }
 
